@@ -20,6 +20,7 @@ import { FormattedMessage } from 'react-intl';
 import AzureDevOpsBuilds from 'sections/dashboard/last20builds';
 import AzureDevOpsWorkItemsPieChart from 'sections/dashboard/WorkItemsPieChart';
 import AzureDevOpsWorkItems from 'sections/admin/workitems-list/Workitems';
+import AzureDevOpsWorkItemsDone from 'sections/admin/workitems-list/WorkitemsDone';
 import SelfHostedAgentsPieChart from 'sections/dashboard/SelfHostedAgentsPieChart';
 import DeploymentPoolsPieChart from 'sections/dashboard/DeploymentPoolsPieChart';
 
@@ -91,6 +92,9 @@ const Dashboard = () => {
                 </Grid>
                 <Grid item xs={12}>
                     <AzureDevOpsWorkItems />
+                </Grid>
+                <Grid item xs={12}>
+                    <AzureDevOpsWorkItemsDone />
                 </Grid>
                 <Grid item xs={12}>
                     <AzureDevOpsWorkItemsPieChart />
