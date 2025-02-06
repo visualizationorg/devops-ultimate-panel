@@ -8,10 +8,12 @@ const organization = 'nadidurna1';
 const AzureDevOpsWorkItems = () => {
     const [workItems, setWorkItems] = useState([]);
     const [completionPercentage, setCompletionPercentage] = useState({});
+    const [stateCategoryMap, setStateCategoryMap] = useState({});
 
     useEffect(() => {
         const fetchWorkItems = async () => {
             try {
+                // Organizasyondaki tüm projeleri çek
                 const projectsResponse = await axios.get(
                     `https://dev.azure.com/${organization}/_apis/projects?api-version=7.0-preview.4`,
                     {
@@ -25,7 +27,55 @@ const AzureDevOpsWorkItems = () => {
                 const projects = projectsResponse.data.value;
                 let allWorkItems = [];
                 let workItemIdsSet = new Set();
+                
+                // Organizasyondaki tüm process tiplerini projects expand ederek çek
+                const processResponse = await axios.get(
+                    `https://dev.azure.com/${organization}/_apis/work/processes?$expand=projects&api-version=7.2-preview.2`,
+                    {
+                        headers: {
+                            'Authorization': `Basic ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                    }
+                );
 
+                const processes = processResponse.data.value;
+                const projectProcessMap = {};
+
+                processes.forEach(process => {
+                    if (process.projects) {
+                        process.projects.forEach(project => {
+                            projectProcessMap[project.name] = process.typeId;
+                        });
+                    }
+                });
+
+                // Projelerin bulundukları process tiplerinin State kategorilerini çek
+                const getStateCategory = async (typeId) => {
+                    const workItemTypesResponse = await axios.get(
+                        `https://dev.azure.com/${organization}/_apis/work/processes/${typeId}/workitemtypes?$expand=states&api-version=7.2-preview.2`,
+                        {
+                            headers: {
+                                'Authorization': `Basic ${token}`,
+                                'Content-Type': 'application/json'
+                            },
+                        }
+                    );
+
+                    const states = workItemTypesResponse.data.value.flatMap(item => item.states);
+                    return states.reduce((acc, state) => {
+                        acc[state.name] = state.stateCategory;
+                        return acc;
+                    }, {});
+                };
+
+                const tempStateCategoryMap = {};
+                for (const projectName in projectProcessMap) {
+                    tempStateCategoryMap[projectName] = await getStateCategory(projectProcessMap[projectName]);
+                }
+                setStateCategoryMap(tempStateCategoryMap);
+
+                // Tüm projelerdeki tüm work itemları çek
                 for (const project of projects) {
                     let idsToFetch = [];
                     let continuationToken = null;
@@ -57,6 +107,7 @@ const AzureDevOpsWorkItems = () => {
                         continuationToken = wiqlResponse.headers['x-ms-continuationtoken'];
                     } while (continuationToken);
 
+                    // Work Item detaylarını çek
                     while (idsToFetch.length > 0) {
                         const idsChunk = idsToFetch.splice(0, 200);
 
@@ -82,11 +133,13 @@ const AzureDevOpsWorkItems = () => {
 
         fetchWorkItems();
     }, []);
+
     useEffect(() => {
         const stateCounts = {};
         let sprintCounts = {};
         let completionData = {};
 
+        // Work Item'ları dolaşarak State sayımlarını yap
         workItems.forEach((item) => {
             const state = item.fields['System.State'];
             const teamProject = item.fields['System.TeamProject'];
@@ -118,7 +171,9 @@ const AzureDevOpsWorkItems = () => {
                 }
 
                 sprintCounts[parentGroup][sprintName].total++;
-                if (state === 'Done' || state === 'Closed') {
+
+                // State kategorisi Completed olanlara göre sayım yap
+                if (stateCategoryMap[teamProject]?.[state] === 'Completed') {
                     sprintCounts[parentGroup][sprintName].completed++;
                 }
             }
