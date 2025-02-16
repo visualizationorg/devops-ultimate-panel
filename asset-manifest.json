@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/devops-ultimate-panel/static/css/main.83e88e37.css",
-    "main.js": "/devops-ultimate-panel/static/js/main.998e574a.js",
+    "main.js": "/devops-ultimate-panel/static/js/main.977d1109.js",
     "static/js/714.b7d79688.chunk.js": "/devops-ultimate-panel/static/js/714.b7d79688.chunk.js",
     "static/js/150.3cb7aaaa.chunk.js": "/devops-ultimate-panel/static/js/150.3cb7aaaa.chunk.js",
     "static/js/952.3dba2deb.chunk.js": "/devops-ultimate-panel/static/js/952.3dba2deb.chunk.js",
@@ -191,7 +191,7 @@
     "static/media/roboto-greek-ext-700-normal.woff": "/devops-ultimate-panel/static/media/roboto-greek-ext-700-normal.249853776d22a271b2b5.woff",
     "index.html": "/devops-ultimate-panel/index.html",
     "main.83e88e37.css.map": "/devops-ultimate-panel/static/css/main.83e88e37.css.map",
-    "main.998e574a.js.map": "/devops-ultimate-panel/static/js/main.998e574a.js.map",
+    "main.977d1109.js.map": "/devops-ultimate-panel/static/js/main.977d1109.js.map",
     "714.b7d79688.chunk.js.map": "/devops-ultimate-panel/static/js/714.b7d79688.chunk.js.map",
     "150.3cb7aaaa.chunk.js.map": "/devops-ultimate-panel/static/js/150.3cb7aaaa.chunk.js.map",
     "952.3dba2deb.chunk.js.map": "/devops-ultimate-panel/static/js/952.3dba2deb.chunk.js.map",
@@ -207,6 +207,6 @@
   },
   "entrypoints": [
     "static/css/main.83e88e37.css",
-    "static/js/main.998e574a.js"
+    "static/js/main.977d1109.js"
   ]
 }
