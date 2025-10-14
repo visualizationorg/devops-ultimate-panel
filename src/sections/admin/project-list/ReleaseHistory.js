@@ -1,27 +1,11 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useLoaderData, useNavigate, useRevalidator } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 
-// material-ui
-import { useTheme } from '@mui/material/styles';
-import { Box, Fab, Link, Stack } from '@mui/material';
-import { GridActionsCellItem } from '@mui/x-data-grid';
-
 // project imports
-import AnimateButton from 'components/@extended/AnimateButton';
 import CustomGrid from 'components/DataGrid';
-import MainCard from 'components/MainCard';
-import UserDelete from 'sections/admin/user-list/Delete';
-import UserEdit from 'sections/admin/user-list/Edit';
-
 import { GetReleaseHistory } from 'api/ProjectsApi';
 
-// assets
-import { DeleteOutlined, EditOutlined, LinkOutlined, PlusOutlined } from '@ant-design/icons';
-import { Link as LinkIcon, Lock as LockIcon, Public as PublicIcon } from '@mui/icons-material/';
-
 // third-party
-import { FormattedMessage, useIntl } from 'react-intl';
 import moment from 'moment';
 
 // ==============================|| PROJECT LIST - RELEASE HISTORY ||============================== //

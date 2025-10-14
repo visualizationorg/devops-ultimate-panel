@@ -1,21 +1,13 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useLoaderData, useNavigate, useRevalidator } from 'react-router-dom';
+import React, { useMemo } from 'react';
+import { useLoaderData, } from 'react-router-dom';
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
-import { Box, Fab, Stack } from '@mui/material';
-import { GridActionsCellItem } from '@mui/x-data-grid';
+import { Box, Stack } from '@mui/material';
 
 // project imports
-import AnimateButton from 'components/@extended/AnimateButton';
 import CustomGrid from 'components/DataGrid';
 import MainCard from 'components/MainCard';
-import UserDelete from 'sections/admin/user-list/Delete';
-import UserEdit from 'sections/admin/user-list/Edit';
-
-// assets
-import { DeleteOutlined, EditOutlined, LinkOutlined, PlusOutlined } from '@ant-design/icons';
-import { Check as CheckIcon, Close as CloseIcon } from '@mui/icons-material/';
 
 // third-party
 import { FormattedMessage, useIntl } from 'react-intl';
@@ -25,57 +17,22 @@ import moment from 'moment';
 
 export default function UserList() {
   const theme = useTheme();
-  const navigate = useNavigate();
   const intl = useIntl();
 
   const items = useLoaderData();
-  const revalidator = useRevalidator();
-  const loadData = () => { revalidator.revalidate(); setRowData({}); }
-
   const rows = items?.members || [];
-
-  // console.log(items)
-  // console.log(rows)
-
-  const [rowData, setRowData] = useState({});
-
-  const [openEdit, setOpenEdit] = useState(false);
-  const handleClickEdit = useCallback(
-    (params) => () => {
-      setRowData(params);
-      setOpenEdit(true);
-    },
-    []
-  );
-  // eslint-disable-next-line no-unused-vars
-  const handleCloseEdit = (event, reason) => {
-    setOpenEdit(false);
-  };
-
-  const [openDelete, setOpenDelete] = useState(false);
-  const handleClickDelete = useCallback(
-    (params) => () => {
-      setRowData(params);
-      setOpenDelete(true);
-    },
-    []
-  );
-  // eslint-disable-next-line no-unused-vars
-  const handleCloseDelete = (event, reason) => {
-    setOpenDelete(false);
-  };
 
   const columns = useMemo(
     () => [
-      {
-        field: 'id',
-        headerName: 'ID',
-        description: 'ID',
-        flex: 1,
-        minWidth: 150,
-        headerAlign: 'center',
-        align: 'center'
-      },
+      // {
+      //   field: 'id',
+      //   headerName: 'ID',
+      //   description: 'ID',
+      //   flex: 1,
+      //   minWidth: 150,
+      //   headerAlign: 'center',
+      //   align: 'center'
+      // },
       {
         field: 'user',
         headerName: intl.formatMessage({ id: "user" }),
@@ -119,7 +76,7 @@ export default function UserList() {
       {
         field: 'status',
         headerName: "status",
-        description: "status",  
+        description: "status",
         flex: 0.5,
         minWidth: 100,
         renderCell: (params) => params.row.accessLevel.status
@@ -129,38 +86,6 @@ export default function UserList() {
         //     : <CloseIcon style={{ fontSize: '20px', color: theme.palette.error.main }} />
         // ),
       },
-      // {
-      //   field: 'edit',
-      //   type: 'actions',
-      //   headerName: intl.formatMessage({ id: "edit" }),
-      //   description: intl.formatMessage({ id: "edit" }),
-      //   flex: 0.5,
-      //   minWidth: 100,
-      //   getActions: (params) => [
-      //     <GridActionsCellItem
-      //       key="edit"
-      //       icon={<EditOutlined style={{ fontSize: '16px', color: theme.palette.primary.main }} />}
-      //       label={intl.formatMessage({ id: "edit" })}
-      //       onClick={handleClickEdit(params)}
-      //     />,
-      //   ],
-      // },
-      // {
-      //   field: 'delete',
-      //   type: 'actions',
-      //   headerName: intl.formatMessage({ id: "delete" }),
-      //   description: intl.formatMessage({ id: "delete" }),
-      //   flex: 0.5,
-      //   minWidth: 100,
-      //   getActions: (params) => [
-      //     <GridActionsCellItem
-      //       key="delete"
-      //       icon={<DeleteOutlined style={{ fontSize: '16px', color: theme.palette.error.main }} />}
-      //       label={intl.formatMessage({ id: "delete" })}
-      //       onClick={handleClickDelete(params)}
-      //     />,
-      //   ],
-      // }
     ],
     // eslint-disable-next-line
     [theme, intl]
@@ -168,42 +93,12 @@ export default function UserList() {
 
   return (
     <>
-      {/* <UserEdit
-        id={rowData.row?.id}
-        roleId={rowData.row?.roleId ?? 0}
-        open={openEdit}
-        handleClose={handleCloseEdit}
-        loadData={loadData}
-        filterTypes={filterTypes}
-        topMenus={topMenus}
-        companies={companies}
-      />
-      <UserDelete
-        id={rowData.row?.id}
-        roleId={rowData.row?.roleId ?? 0}
-        title={rowData.row?.componentName}
-        open={openDelete}
-        handleClose={handleCloseDelete}
-        loadData={loadData}
-      /> */}
       <MainCard
         content={false}
-        title={<FormattedMessage id="user-entitlements-list" />}
+        title={<FormattedMessage id="user-list" />}
         secondary={
           <Stack direction="row" spacing={2}>
             <Box id="filter-panel" />
-            {/* <AnimateButton>
-              <Fab variant="extended" color="primary" aria-label="add" size="small" onClick={() => { }} style={{ boxShadow: 'none', paddingLeft: '14px', paddingRight: '14px' }}>
-                <PlusOutlined />
-                &nbsp;<FormattedMessage id="new-user" />
-              </Fab>
-            </AnimateButton> */}
-            {/* <AnimateButton>
-              <Fab variant="extended" color="primary" aria-label="add" size="small" onClick={() => navigate("/report-company")} style={{ boxShadow: 'none', paddingLeft: '14px', paddingRight: '14px' }}>
-                <LinkOutlined />
-                &nbsp;<FormattedMessage id="report-company" />
-              </Fab>
-            </AnimateButton> */}
           </Stack>
         }
       >

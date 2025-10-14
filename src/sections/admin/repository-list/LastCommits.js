@@ -4,51 +4,35 @@ import PropTypes from 'prop-types';
 // project imports
 import CustomGrid from 'components/DataGrid';
 
-import { GetAll as GetAllRepos, GetCommits } from 'api/ReposApi';
-import { GetAll as GetAllProjects } from 'api/ProjectsApi';
+import { fetchAllProjects, fetchAllRepositories, fetchCommits } from 'services/AzureDevOpsService';
 
 // third-party
 import moment from 'moment';
 
 // ==============================|| REPOSITORY LIST - LAST COMMITS ||============================== //
 
-const LastCommits = (props) => {
-    const {
-        projects = [],
-        repositories = []
-    } = props;
+const LastCommits = () => {
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const [projects, setProjects] = useState([]);
     const [commits, setCommits] = useState([]);
 
     useEffect(() => {
-        const fetchProjects = async () => {
+        const fetchData = async () => {
             try {
-                const projectsResponse = await GetAllProjects();
-                setProjects(projectsResponse.data.value);
-            } catch (error) {
-                console.error('Error fetching projects:', error);
-            }
-        };
+                setLoading(true);
+                const projects = await fetchAllProjects();
+                const commitsData = [];
 
-        fetchProjects();
-    }, []);
-
-    useEffect(() => {
-        const fetchCommits = async () => {
-            const commitsData = [];
-            for (const project of projects) {
-                try {
-                    const reposResponse = await GetAllRepos(project.name);
-                    for (const repo of reposResponse.data.value) {
-                        const commitsResponse = await GetCommits(project.name, repo.id)
-                        if (commitsResponse.data.value.length === 0) {
-                            setError('No commits found');
-                        } else {
-                            commitsResponse.data.value.forEach(commit => {
+                for (const project of projects) {
+                    const repositories = await fetchAllRepositories(project.name);
+                    
+                    for (const repo of repositories) {
+                        const repoCommits = await fetchCommits(project.name, repo.id);
+                        
+                        if (repoCommits.length > 0) {
+                            repoCommits.forEach(commit => {
                                 commitsData.push({
                                     id: commit.commitId,
                                     projectName: project.name,
@@ -60,19 +44,18 @@ const LastCommits = (props) => {
                             });
                         }
                     }
-                } catch (error) {
-                    console.error(`Error fetching commits for project ${project.name}:`, error);
-                    setError(`Error fetching commits for project ${project.name}`);
                 }
+
+                setCommits(commitsData);
+            } catch (err) {
+                setError(err);
+            } finally {
+                setLoading(false);
             }
-            setCommits(commitsData);
-            setLoading(false);
         };
 
-        if (projects.length > 0) {
-            fetchCommits();
-        }
-    }, [projects]);
+        fetchData();
+    }, []);
 
     const columns = [
         { field: 'id', headerName: 'Commit ID', width: 200, headerAlign: 'center', align: 'center' },

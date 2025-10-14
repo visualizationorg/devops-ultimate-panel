@@ -23,6 +23,13 @@ import AzureDevOpsWorkItems from 'sections/admin/workitems-list/Workitems';
 import AzureDevOpsWorkItemsDone from 'sections/admin/workitems-list/WorkitemsDone';
 import SelfHostedAgentsPieChart from 'sections/dashboard/SelfHostedAgentsPieChart';
 import DeploymentPoolsPieChart from 'sections/dashboard/DeploymentPoolsPieChart';
+import ErrorBoundary from 'components/ErrorBoundary';
+import RepositoryComparison from 'sections/admin/repositories/RepositoryComparison';
+import { useCommits, useRepositories, usePullRequests } from 'hooks/useAzureDevOps';
+import TrendAnalysis from 'sections/admin/analytics/TrendAnalysis';
+import PerformanceMetrics from 'sections/admin/analytics/PerformanceMetrics';
+import TeamCollaboration from 'sections/admin/analytics/TeamCollaboration';
+import MainCard from 'components/MainCard';
 
 // ==============================|| DASHBOARD ||============================== //
 
@@ -30,6 +37,9 @@ const Dashboard = () => {
 
     const [projectCount, setProjectCount] = useState([]);
     const [userCount, setUserCount] = useState([]);
+    const { data: repositories } = useRepositories();
+    const { data: commits } = useCommits();
+    const { data: pullRequests } = usePullRequests();
 
     useEffect(() => {
         const fetchProjects = async () => {
@@ -55,7 +65,7 @@ const Dashboard = () => {
     }, []);
 
     return (
-        <>
+        <ErrorBoundary>
             <Grid container rowSpacing={4.5} columnSpacing={3}>
                 {/* row 1 */}
                 <Grid item xs={12}>
@@ -85,7 +95,9 @@ const Dashboard = () => {
                     </AnalyticsDataCard>
                 </Grid>
                 <Grid item xs={12}>
-                    <LastBuildsChart />
+                    <ErrorBoundary>
+                        <LastBuildsChart />
+                    </ErrorBoundary>
                 </Grid>
                 <Grid item xs={12}>
                     <AzureDevOpsBuilds />
@@ -96,15 +108,46 @@ const Dashboard = () => {
                 <Grid item xs={12}>
                     <AzureDevOpsWorkItemsDone />
                 </Grid>
+                {/* <Grid item xs={12}>
+                    <ErrorBoundary>
+                        <AzureDevOpsWorkItemsPieChart />
+                    </ErrorBoundary>
+                </Grid> */}
                 <Grid item xs={12}>
-                    <AzureDevOpsWorkItemsPieChart />
+                    Trend Analysis:
+                    <TrendAnalysis
+                        commits={commits}
+                        pullRequests={pullRequests}
+                    />
+                </Grid>
+                <Grid item xs={12}>
+                    Performance Metrics:
+                    <PerformanceMetrics
+                        commits={commits}
+                        pullRequests={pullRequests}
+                    />
+                </Grid>
+                <Grid item xs={12}>
+                    Repository Comparison:
+                    <RepositoryComparison
+                        repositories={repositories}
+                        commits={commits}
+                        pullRequests={pullRequests}
+                    />
+                </Grid>
+                <Grid item xs={12}>
+                    <MainCard title="Team Collaboration">
+                        <TeamCollaboration 
+                            commits={commits} 
+                            pullRequests={pullRequests} 
+                        />
+                    </MainCard>
                 </Grid>
 
                 {/* <Grid item md={8} sx={{ display: { sm: 'none', md: 'block', lg: 'none' } }} /> */}
 
             </Grid>
-
-        </>
+        </ErrorBoundary>
     )
 };
 

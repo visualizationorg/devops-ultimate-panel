@@ -1,137 +1,59 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { fetchAllProjects, fetchProcesses, fetchStateCategory, fetchWorkItemsForProject, fetchWorkItemDetails } from 'services/AzureDevOpsService';
 
-const pat = process.env.REACT_APP_API_PAT;
-const token = btoa(`:${pat}`);
-const organization = 'nadidurna1';
-
-const AzureDevOpsWorkItems = () => {
+const WorkitemsDone = () => {
     const [workItems, setWorkItems] = useState([]);
     const [completionPercentage, setCompletionPercentage] = useState({});
     const [stateCategoryMap, setStateCategoryMap] = useState({});
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        const fetchWorkItems = async () => {
+        const fetchData = async () => {
             try {
-                // Organizasyondaki tüm projeleri çek
-                const projectsResponse = await axios.get(
-                    `https://dev.azure.com/${organization}/_apis/projects?api-version=7.0-preview.4`,
-                    {
-                        headers: {
-                            'Authorization': `Basic ${token}`,
-                            'Content-Type': 'application/json'
-                        },
-                    }
-                );
-
-                const projects = projectsResponse.data.value;
-                let allWorkItems = [];
-                let workItemIdsSet = new Set();
+                setLoading(true);
                 
-                // Organizasyondaki tüm process tiplerini projects expand ederek çek
-                const processResponse = await axios.get(
-                    `https://dev.azure.com/${organization}/_apis/work/processes?$expand=projects&api-version=7.2-preview.2`,
-                    {
-                        headers: {
-                            'Authorization': `Basic ${token}`,
-                            'Content-Type': 'application/json'
-                        },
-                    }
-                );
+                // Projeleri ve process tiplerini çek
+                const projects = await fetchAllProjects();
+                const projectProcessMap = await fetchProcesses();
 
-                const processes = processResponse.data.value;
-                const projectProcessMap = {};
-
-                processes.forEach(process => {
-                    if (process.projects) {
-                        process.projects.forEach(project => {
-                            projectProcessMap[project.name] = process.typeId;
-                        });
-                    }
-                });
-
-                // Projelerin bulundukları process tiplerinin State kategorilerini çek
-                const getStateCategory = async (typeId) => {
-                    const workItemTypesResponse = await axios.get(
-                        `https://dev.azure.com/${organization}/_apis/work/processes/${typeId}/workitemtypes?$expand=states&api-version=7.2-preview.2`,
-                        {
-                            headers: {
-                                'Authorization': `Basic ${token}`,
-                                'Content-Type': 'application/json'
-                            },
-                        }
-                    );
-
-                    const states = workItemTypesResponse.data.value.flatMap(item => item.states);
-                    return states.reduce((acc, state) => {
-                        acc[state.name] = state.stateCategory;
-                        return acc;
-                    }, {});
-                };
-
+                // State kategorilerini çek
                 const tempStateCategoryMap = {};
                 for (const projectName in projectProcessMap) {
-                    tempStateCategoryMap[projectName] = await getStateCategory(projectProcessMap[projectName]);
+                    tempStateCategoryMap[projectName] = await fetchStateCategory(projectProcessMap[projectName]);
                 }
                 setStateCategoryMap(tempStateCategoryMap);
 
-                // Tüm projelerdeki tüm work itemları çek
+                // Work itemları çek
+                let allWorkItems = [];
+                let workItemIdsSet = new Set();
+
                 for (const project of projects) {
-                    let idsToFetch = [];
-                    let continuationToken = null;
+                    const workItemIds = await fetchWorkItemsForProject(project.name);
+                    workItemIds.forEach(item => {
+                        if (item?.id && !workItemIdsSet.has(item.id)) {
+                            workItemIdsSet.add(item.id);
+                        }
+                    });
+                }
 
-                    do {
-                        const wiqlResponse = await axios.post(
-                            `https://dev.azure.com/${organization}/${project.name}/_apis/wit/wiql?api-version=7.2-preview.2`,
-                            {
-                                query: `SELECT [System.Id], [System.State] FROM WorkItems`
-                            },
-                            {
-                                headers: {
-                                    'Authorization': `Basic ${token}`,
-                                    'Content-Type': 'application/json',
-                                    'X-MS-Continuation': continuationToken || '',
-                                },
-                            }
-                        );
-
-                        const workItemsFetched = wiqlResponse.data.workItems.filter(item => item && item.id);
-
-                        workItemsFetched.forEach(item => {
-                            if (!workItemIdsSet.has(item.id)) {
-                                workItemIdsSet.add(item.id);
-                                idsToFetch.push(item.id);
-                            }
-                        });
-
-                        continuationToken = wiqlResponse.headers['x-ms-continuationtoken'];
-                    } while (continuationToken);
-
-                    // Work Item detaylarını çek
-                    while (idsToFetch.length > 0) {
-                        const idsChunk = idsToFetch.splice(0, 200);
-
-                        const detailsResponse = await axios.get(
-                            `https://dev.azure.com/${organization}/_apis/wit/workitems?ids=${idsChunk.join(',')}&fields=System.TeamProject,System.IterationPath,System.IterationLevel1,System.IterationLevel2,System.State,System.AssignedTo&api-version=7.2-preview.3`,
-                            {
-                                headers: {
-                                    'Authorization': `Basic ${token}`,
-                                    'Content-Type': 'application/json'
-                                },
-                            }
-                        );
-
-                        allWorkItems = [...allWorkItems, ...detailsResponse.data.value];
-                    }
+                // Work item detaylarını çek
+                const idsArray = Array.from(workItemIdsSet);
+                while (idsArray.length > 0) {
+                    const chunk = idsArray.splice(0, 200);
+                    const details = await fetchWorkItemDetails(chunk, 'System.TeamProject,System.IterationPath,System.IterationLevel1,System.IterationLevel2,System.State,System.AssignedTo');
+                    allWorkItems = [...allWorkItems, ...details];
                 }
 
                 setWorkItems(allWorkItems);
-            } catch (error) {
-                console.error('Error fetching work items:', error);
+            } catch (err) {
+                setError(err);
+            } finally {
+                setLoading(false);
             }
         };
 
-        fetchWorkItems();
+        fetchData();
     }, []);
 
     useEffect(() => {
@@ -216,4 +138,4 @@ const AzureDevOpsWorkItems = () => {
     );
 };
 
-export default AzureDevOpsWorkItems;
+export default WorkitemsDone;

@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
-    Table, TableBody, TableCell, TableContainer,
-    TableHead, TableRow, Paper
+    Paper,
+    Table, 
+    TableBody, 
+    TableCell, 
+    TableContainer,
+    TableHead, 
+    TableRow, 
 } from '@mui/material';
 
-import axios from 'axios';
+import { useAzureDevOps } from 'hooks/useAzureDevOps';
 import AssigneeDetails from 'sections/admin/workitems-list/AssigneeDetails';
-
-const pat = process.env.REACT_APP_API_PAT;
-const token = btoa(`:${pat}`);
-const organization = 'nadidurna1';
 
 // function createData(name, design, newVal, done, inProgress, toDo, committed, approved, ready, closed) {
 //     const total = design + newVal + done + inProgress + toDo + committed + approved + ready + closed;
@@ -39,85 +40,11 @@ const organization = 'nadidurna1';
 // };
 
 export default function CustomTable() {
-    // const columnTotals = calculateColumnTotals(rows);
+    const { workItems, loading, error } = useAzureDevOps();
+    const [selectedAssignee, setSelectedAssignee] = useState(null);
 
-    const [workItems, setWorkItems] = useState([]);
-
-    useEffect(() => {
-        const fetchWorkItems = async () => {
-            try {
-                const projectsResponse = await axios.get(
-                    `https://dev.azure.com/${organization}/_apis/projects?api-version=7.0-preview.4`,
-                    {
-                        headers: {
-                            'Authorization': `Basic ${token}`,
-                            'Content-Type': 'application/json'
-                        },
-                    }
-                );
-
-                const projects = projectsResponse.data.value;
-                let allWorkItems = [];
-                let workItemIdsSet = new Set(); // Tekrarları engellemek için Set kullanıyoruz
-
-                for (const project of projects) {
-                    let idsToFetch = [];
-                    let continuationToken = null;
-
-                    do {
-                        const wiqlResponse = await axios.post(
-                            `https://dev.azure.com/${organization}/${project.name}/_apis/wit/wiql?api-version=7.2-preview.2`,
-                            {
-                                query: `SELECT [System.Id], [System.State] FROM WorkItems`
-                            },
-                            {
-                                headers: {
-                                    'Authorization': `Basic ${token}`,
-                                    'Content-Type': 'application/json',
-                                    'X-MS-Continuation': continuationToken || '',
-                                },
-                            }
-                        );
-
-                        const workItemsFetched = wiqlResponse.data.workItems.filter(item => item && item.id);
-
-                        // Work item ID'leri varsa ve Set'te değilse ekle
-                        workItemsFetched.forEach(item => {
-                            if (!workItemIdsSet.has(item.id)) {
-                                workItemIdsSet.add(item.id);
-                                idsToFetch.push(item.id);
-                            }
-                        });
-
-                        continuationToken = wiqlResponse.headers['x-ms-continuationtoken'];
-                    } while (continuationToken);
-
-                    while (idsToFetch.length > 0) {
-                        const idsChunk = idsToFetch.splice(0, 200);
-
-                        const detailsResponse = await axios.get(
-                            `https://dev.azure.com/${organization}/_apis/wit/workitems?ids=${idsChunk.join(',')}&fields=System.State,System.AssignedTo,System.TeamProject,System.Title,System.WorkItemType&api-version=7.2-preview.3`,
-                            {
-                                headers: {
-                                    'Authorization': `Basic ${token}`,
-                                    'Content-Type': 'application/json'
-                                },
-                            }
-                        );
-
-                        allWorkItems = [...allWorkItems, ...detailsResponse.data.value];
-                    }
-                }
-
-                setWorkItems(allWorkItems);
-            } catch (error) {
-                console.error('Error fetching work items:', error);
-            }
-        };
-
-        fetchWorkItems();
-    }, []);
-
+    if (loading) return <div>Yükleniyor...</div>;
+    if (error) return <div>Hata: {error.message}</div>;
 
     // System.State durumuna göre gruplama
     const stateCounts = workItems.reduce((acc, item) => {
@@ -157,18 +84,16 @@ export default function CustomTable() {
     console.log(stateCounts)
     // console.log(stateCountsWithAssignee);
 
-    // workItems verisinden stateCountsWithAssignee nesnesini oluşturma
+    // Work Item'ları atanan kişi ve duruma göre grupla
     const stateCountsWithAssignee = workItems.reduce((acc, item) => {
+        const assignee = item.fields['System.AssignedTo']?.displayName || '(blank)';
         const state = item.fields['System.State'];
-        const assignedTo = item.fields['System.AssignedTo']
-            ? item.fields['System.AssignedTo'].displayName
-            : 'blank';
 
+        if (!acc[assignee]) {
+            acc[assignee] = {};
+        }
         if (state) {
-            if (!acc[assignedTo]) {
-                acc[assignedTo] = {};
-            }
-            acc[assignedTo][state] = (acc[assignedTo][state] || 0) + 1;
+            acc[assignee][state] = (acc[assignee][state] || 0) + 1;
         }
         return acc;
     }, {});
@@ -203,16 +128,9 @@ export default function CustomTable() {
         });
     });
 
-
-
-
-    const [selectedAssignee, setSelectedAssignee] = useState(null); // Yeni state
-
     const handleRowClick = (assignee) => {
         setSelectedAssignee(assignee); // Satır tıklama olayını yönetme
     };
-
-
 
     return (
         <>

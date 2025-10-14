@@ -12,6 +12,7 @@ import WelcomeImageArrow from 'assets/images/analytics/welcome-arrow.png';
 
 // third-party
 import { FormattedMessage } from 'react-intl';
+import { getStorageValue, STORAGE_KEYS } from 'utils/storage';
 
 // ==============================|| ANALYTICS - WELCOME ||============================== //
 
@@ -53,7 +54,7 @@ const WelcomeBanner = () => {
                   }
                 }}
               >
-                ORGANIZATION : {process.env.REACT_APP_ORGANIZATION}
+                ORGANIZATION : {getStorageValue(STORAGE_KEYS.ORGANIZATION, '')}
               </Button>
             </Box>
           </Stack>

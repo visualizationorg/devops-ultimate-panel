@@ -7,14 +7,15 @@ import { useTheme } from '@mui/material/styles';
 // project import
 import { ThemeMode } from 'config';
 import useConfig from 'hooks/useConfig';
+import { getStorageValue, STORAGE_KEYS } from 'utils/storage';
 
 // third-party
 import ApexCharts from 'react-apexcharts';
 import moment from 'moment';
 
-const pat = process.env.REACT_APP_API_PAT;
+const pat = getStorageValue(STORAGE_KEYS.PAT, '');
 const token = btoa(`:${pat}`);
-const organization = 'nadidurna1';
+const organization = getStorageValue(STORAGE_KEYS.ORGANIZATION, '');
 
 // ==============================|| LAST BUILDS CHART ||============================== //
 

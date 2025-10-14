@@ -1,13 +1,10 @@
 import axios from 'axios';
 
 import { openSnackbar } from 'api/snackbar';
+import { getStorageValue, STORAGE_KEYS } from './storage';
 
-const pat = process.env.REACT_APP_API_PAT;
-const token = btoa(`:${pat}`);
-// const axiosServices = axios.create({ baseURL: process.env.REACT_APP_API_VSAEX_URL });
 const axiosServices = axios.create({
   headers: {
-    'Authorization': `Basic ${token}`,
     'Content-Type': 'application/json'
   }
 });
@@ -16,11 +13,11 @@ const axiosServices = axios.create({
 
 axiosServices.interceptors.request.use(
   async (config) => {
-    // config.headers['Authorization'] = `Basic ${token}`;
-    // config.headers['Content-Type'] = "application/json";
-    // config.headers['Access-Control-Allow-Origin'] = "*";
-    // config.headers['Access-Control-Allow-Credentials'] = "true";
-    // config.headers['Access-Control-Allow-Headers'] = "Origin, X-Requested-With, Content-Type, Accept";
+    const pat = getStorageValue(STORAGE_KEYS.PAT, '');
+    if (pat) {
+      const token = btoa(`:${pat}`);
+      config.headers['Authorization'] = `Basic ${token}`;
+    }
     return config;
   },
   (error) => {

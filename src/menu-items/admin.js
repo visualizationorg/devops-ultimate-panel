@@ -3,6 +3,7 @@ import { FormattedMessage } from 'react-intl';
 
 // assets
 import { CalendarTwoTone, ContainerTwoTone, FileTextTwoTone, FunnelPlotTwoTone, TagTwoTone } from '@ant-design/icons';
+import { BuildOutlined, AssignmentOutlined, CodeOutlined, MergeOutlined, TimelineOutlined } from '@mui/icons-material';
 
 // icons
 const icons = {
@@ -13,7 +14,7 @@ const icons = {
 
 const admin = {
   id: 'admin',
-  title: <FormattedMessage id="admin" />,
+  title: 'Yönetim',
   type: 'group',
   children: [
     {
@@ -28,6 +29,42 @@ const admin = {
           type: 'item',
           url: '/project-list',
           icon: icons.FileTextTwoTone
+        },
+        {
+          id: 'project-user-list',
+          title: 'Proje Kullanıcı Listesi',
+          type: 'item',
+          url: '/project-user-list',
+          icon: icons.FileTextTwoTone
+        }
+      ]
+    },
+    {
+      id: 'pipelines',
+      title: 'Pipelines',
+      type: 'collapse',
+      icon: TimelineOutlined,
+      children: [
+        {
+          id: 'builds',
+          title: 'Builds',
+          type: 'item',
+          url: '/builds',
+          icon: BuildOutlined
+        },
+        {
+          id: 'build-history',
+          title: 'Build History',
+          type: 'item',
+          url: '/build-history',
+          icon: BuildOutlined
+        },
+        {
+          id: 'release-history',
+          title: 'Release History',
+          type: 'item',
+          url: '/release-history',
+          icon: TimelineOutlined
         }
       ]
     },
@@ -43,6 +80,20 @@ const admin = {
           type: 'item',
           url: '/repo-list',
           icon: icons.FileTextTwoTone
+        },
+        {
+          id: 'commits',
+          title: 'Commits',
+          type: 'item',
+          url: '/commits',
+          icon: CodeOutlined
+        },
+        {
+          id: 'pull-requests',
+          title: 'Pull Requests',
+          type: 'item',
+          url: '/pull-requests',
+          icon: MergeOutlined
         }
       ]
     },
@@ -62,9 +113,16 @@ const admin = {
         // },
         {
           id: 'user-entitlements-list',
-          title: <FormattedMessage id="user-entitlements-list" />,
+          title: 'Kullanıcı Listesi',
           type: 'item',
           url: '/user-entitlements-list',
+          icon: icons.FileTextTwoTone
+        },
+        {
+          id: 'user-project-list',
+          title: 'Kullanıcı Proje Listesi',
+          type: 'item',
+          url: '/user-project-list',
           icon: icons.FileTextTwoTone
         }
       ]
@@ -82,7 +140,8 @@ const admin = {
           url: '/workitems-list',
           icon: icons.FileTextTwoTone
         }
-      ]
+      ],
+      breadcrumbs: false
     }
   ]
 };

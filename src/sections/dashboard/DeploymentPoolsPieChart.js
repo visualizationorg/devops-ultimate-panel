@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from "react";
 import ApexChart from "react-apexcharts"; // Assuming you are using ApexCharts
 import { LoadingOutlined } from '@ant-design/icons'; // for a loading indicator
+import { getStorageValue, STORAGE_KEYS } from 'utils/storage';
 
 const DeploymentPoolsPieChart = () => {
   const [data, setData] = useState({ running: 0, stopped: 0 });
   const [loading, setLoading] = useState(true);
 
   const fetchPoolsAndAgents = async () => {
-    const pat = process.env.REACT_APP_API_PAT;
+    const pat = getStorageValue(STORAGE_KEYS.PAT, '');
     const token = btoa(`:${pat}`);
-    const organization = 'nadidurna1';
+    const organization = getStorageValue(STORAGE_KEYS.ORGANIZATION, '');
 
     const headers = {
       "Authorization": `Basic ${token}`,

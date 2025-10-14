@@ -15,6 +15,7 @@ import { handlerDrawerOpen, useGetMenuMaster } from 'api/menu';
 
 // assets
 import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
+import Settings from 'components/Settings';
 
 // ==============================|| MAIN LAYOUT - HEADER ||============================== //
 
@@ -48,6 +49,7 @@ const Header = () => {
           {!drawerOpen ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
         </IconButton>
       ) : null}
+      <Settings />
       {headerContent}
     </Toolbar>
   );

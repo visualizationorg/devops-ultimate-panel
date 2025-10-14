@@ -1,33 +1,24 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useLoaderData, useNavigate, useRevalidator } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
 
-// material-ui
-import { useTheme } from '@mui/material/styles';
-import { Box, Fab, Link, Stack } from '@mui/material';
-import { GridActionsCellItem } from '@mui/x-data-grid';
+// DevExtreme
+import DataGrid, { Column, Grouping, GroupPanel, Paging, Pager, Toolbar, Item } from 'devextreme-react/data-grid';
 
 // project imports
-import AnimateButton from 'components/@extended/AnimateButton';
-import CustomGrid from 'components/DataGrid';
 import MainCard from 'components/MainCard';
 
 import { GetAll as GetAllRepos, GetCommits } from 'api/ReposApi';
 import { GetAll as GetAllProjects } from 'api/ProjectsApi';
 
-// assets
-import { DeleteOutlined, EditOutlined, LinkOutlined, PlusOutlined } from '@ant-design/icons';
-import { Link as LinkIcon, Lock as LockIcon, Public as PublicIcon } from '@mui/icons-material/';
-
 // third-party
-import { FormattedMessage, useIntl } from 'react-intl';
+import { FormattedMessage } from 'react-intl';
 import moment from 'moment';
 
 // ==============================|| REPO LIST ||============================== //
 
 export default function RepoList() {
     const [loading, setLoading] = useState(true);
+    // error sadece bir projede olsa da sayfaya basıyor. oysa ki tüm projelerde length 0 ise hata vermesi gerekiyor.
     const [error, setError] = useState(null);
-
     const [projects, setProjects] = useState([]);
     const [commits, setCommits] = useState([]);
 
@@ -81,14 +72,18 @@ export default function RepoList() {
         }
     }, [projects]);
 
-    const columns = [
-        { field: 'id', headerName: 'Commit ID', width: 200, headerAlign: 'center', align: 'center' },
-        { field: 'projectName', headerName: 'Project Name', width: 150 },
-        { field: 'repoName', headerName: 'Repository Name', width: 150 },
-        { field: 'author', headerName: 'Author', width: 150 },
-        { field: 'date', headerName: 'Date', width: 200, renderCell: (params) => Boolean(params.value) && moment(params.value).format('LLL') },
-        { field: 'message', headerName: 'Message', width: 300 }
-    ];
+    // DevExtreme için cell render fonksiyonları
+    const renderCommitId = (data) => {
+        return (
+            <span style={{ fontFamily: 'monospace', cursor: 'pointer' }} title={data.value}>
+                {data.value ? data.value.substring(0, 10) : ''}
+            </span>
+        );
+    };
+
+    const renderDate = (data) => {
+        return data.value ? moment(data.value).format('LLL') : '';
+    };
 
     return (
         <>
@@ -97,17 +92,77 @@ export default function RepoList() {
                 title={<FormattedMessage id="repo-list" />}
             >
                 {error ? (
-                    <p>{error}</p>
+                    <div style={{ padding: '20px', textAlign: 'center', color: 'red' }}>
+                        <h3>Hata</h3>
+                        <p>{error}</p>
+                    </div>
                 ) : (
                     <>
                         <h1>Last Commits Across Organization</h1>
-                        <CustomGrid
-                            rows={Array.isArray(commits) ? commits : []}
-                            columns={columns}
-                            getRowHeight={() => 'auto'}
-                            pageSize={100}
-                            loading={loading}
-                        />
+                        <div style={{ width: '100%' }}>
+                            <DataGrid
+                                dataSource={commits}
+                                showBorders={true}
+                                allowColumnReordering={true}
+                                allowColumnResizing={true}
+                                columnAutoWidth={true}
+                                showRowLines={true}
+                                showColumnLines={true}
+                                rowAlternationEnabled={true}
+                                hoverStateEnabled={true}
+                                height={600}
+                                width="100%"
+                            >
+                                <Grouping autoExpandAll={true} />
+                                <GroupPanel visible={true} />
+                                <Paging defaultPageSize={50} />
+                                <Pager
+                                    showPageSizeSelector={true}
+                                    allowedPageSizes={[25, 50, 100]}
+                                    showInfo={true}
+                                />
+                                <Toolbar>
+                                    <Item name="groupPanel" />
+                                    <Item name="exportButton" />
+                                    <Item name="columnChooserButton" />
+                                </Toolbar>
+                                
+                                <Column 
+                                    dataField="projectName" 
+                                    caption="Project Name" 
+                                    width={150}
+                                    groupIndex={0}
+                                />
+                                <Column 
+                                    dataField="repoName" 
+                                    caption="Repository Name" 
+                                    width={150}
+                                />
+                                <Column 
+                                    dataField="author" 
+                                    caption="Author" 
+                                    width={150}
+                                />
+                                <Column 
+                                    dataField="date" 
+                                    caption="Date" 
+                                    width={200}
+                                    cellRender={renderDate}
+                                />
+                                <Column 
+                                    dataField="id" 
+                                    caption="Commit ID" 
+                                    width={120}
+                                    cellRender={renderCommitId}
+                                    alignment="center"
+                                />
+                                <Column 
+                                    dataField="message" 
+                                    caption="Message" 
+                                    width={300}
+                                />
+                            </DataGrid>
+                        </div>
                     </>
                 )}
             </MainCard>

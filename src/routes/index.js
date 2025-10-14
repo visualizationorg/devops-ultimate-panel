@@ -10,7 +10,8 @@ const router = createBrowserRouter(
     [
         MainRoutes,
         ErrorRoutes
-    ]
+    ],
+    { basename: "/devops-ultimate-panel" }
 );
 
 export default router;

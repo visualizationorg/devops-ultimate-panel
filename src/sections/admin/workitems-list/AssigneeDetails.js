@@ -1,7 +1,12 @@
 import React from 'react';
 import {
-    Table, TableBody, TableCell, TableContainer,
-    TableHead, TableRow, Paper
+    Table, 
+    TableBody, 
+    TableCell, 
+    TableContainer,
+    TableHead, 
+    TableRow, 
+    Paper
 } from '@mui/material';
 
 export default function AssigneeDetails({ workItems, assignee }) {

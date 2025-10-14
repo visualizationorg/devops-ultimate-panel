@@ -1,60 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-
-const pat = process.env.REACT_APP_API_PAT;
-const token = btoa(`:${pat}`);
-const organization = 'nadidurna1';
+import React from 'react';
+import { useAzureDevOps } from 'hooks/useAzureDevOps';
 
 const AzureDevOpsBuilds = () => {
-    const [builds, setBuilds] = useState([]);
+    const { builds, loading, error } = useAzureDevOps();
 
-    useEffect(() => {
-        const fetchProjectsAndBuilds = async () => {
-            try {
-                // Organizasyondaki projeleri çek
-                const projectsResponse = await axios.get(
-                    `https://dev.azure.com/${organization}/_apis/projects?api-version=7.0`,
-                    {
-                        headers: {
-                            'Authorization': `Basic ${token}`,
-                            'Content-Type': 'application/json'
-                        },
-                    }
-                );
-
-                const projects = projectsResponse.data.value;
-
-                // Her proje için API çağrılarını paralel yap
-                const buildPromises = projects.map(project =>
-                    axios.get(
-                        `https://dev.azure.com/${organization}/${project.name}/_apis/build/builds?api-version=7.0&$top=20`,
-                        {
-                            headers: {
-                                'Authorization': `Basic ${token}`,
-                                'Content-Type': 'application/json'
-                            },
-                        }
-                    )
-                );
-
-                const buildResponses = await Promise.all(buildPromises);
-
-                // Gelen sonuçları birleştir
-                let allBuilds = buildResponses.flatMap(response => response.data.value);
-
-                // Build'leri başlangıç zamanına göre sıralayıp ilk 20 tanesini seç
-                const sortedBuilds = allBuilds
-                    .sort((a, b) => new Date(b.startTime) - new Date(a.startTime))
-                    .slice(0, 20);
-
-                setBuilds(sortedBuilds);
-            } catch (error) {
-                console.error('Error fetching builds:', error);
-            }
-        };
-
-        fetchProjectsAndBuilds();
-    }, []);
+    if (loading) return <div>Yükleniyor...</div>;
+    if (error) return <div>Hata: {error.message}</div>;
 
     return (
         <div>

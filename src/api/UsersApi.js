@@ -1,5 +1,5 @@
 import axios from 'utils/axios';
-
+import { getStorageValue, STORAGE_KEYS } from 'utils/storage';
 export const Loader = async () => {
     try {
         const response = await GetAll();
@@ -11,7 +11,7 @@ export const Loader = async () => {
 
 export const GetAll = async () => {
     try {
-        return await axios.get(`${process.env.REACT_APP_API_VSSPS_URL}/_apis/graph/users?api-version=7.1-preview.1`);
+        return await axios.get(`${process.env.REACT_APP_API_VSSPS_URL}/${getStorageValue(STORAGE_KEYS.ORGANIZATION, '')}/_apis/graph/users?api-version=7.1-preview.1`);
     } catch (error) {
         return Promise.reject(error.data);
     }

@@ -1,4 +1,6 @@
 import { RouterProvider } from 'react-router-dom';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 
 // project import
 import router from 'routes';
@@ -13,14 +15,16 @@ import Notistack from 'components/third-party/Notistack';
 
 const App = () => (
   <ThemeCustomization>
-    <Locales>
-      <ScrollTop>
-        <Notistack>
-          <RouterProvider router={router} />
-          <Snackbar />
-        </Notistack>
-      </ScrollTop>
-    </Locales>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <Locales>
+        <ScrollTop>
+          <Notistack>
+            <RouterProvider router={router} />
+            <Snackbar />
+          </Notistack>
+        </ScrollTop>
+      </Locales>
+    </LocalizationProvider>
   </ThemeCustomization>
 );
 

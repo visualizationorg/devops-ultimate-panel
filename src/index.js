@@ -6,6 +6,9 @@ import 'simplebar-react/dist/simplebar.min.css';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 
+// DevExtreme
+import 'devextreme/dist/css/dx.light.css';
+
 // google-fonts
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
