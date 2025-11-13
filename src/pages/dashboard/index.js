@@ -23,6 +23,7 @@ import AzureDevOpsWorkItems from 'sections/admin/workitems-list/Workitems';
 import AzureDevOpsWorkItemsDone from 'sections/admin/workitems-list/WorkitemsDone';
 import SelfHostedAgentsPieChart from 'sections/dashboard/SelfHostedAgentsPieChart';
 import DeploymentPoolsPieChart from 'sections/dashboard/DeploymentPoolsPieChart';
+import BuildReasonsPieChart from 'sections/dashboard/BuildReasonsPieChart';
 import ErrorBoundary from 'components/ErrorBoundary';
 import RepositoryComparison from 'sections/admin/repositories/RepositoryComparison';
 import { useCommits, useRepositories, usePullRequests } from 'hooks/useAzureDevOps';
@@ -92,6 +93,11 @@ const Dashboard = () => {
                 <Grid item xs={12} sm={6} md={4} lg={3}>
                     <AnalyticsDataCard title="Deployment Pools">
                         <DeploymentPoolsPieChart />
+                    </AnalyticsDataCard>
+                </Grid>
+                <Grid item xs={12} sm={6} md={4} lg={3}>
+                    <AnalyticsDataCard title="Build Reasons">
+                        <BuildReasonsPieChart />
                     </AnalyticsDataCard>
                 </Grid>
                 <Grid item xs={12}>
