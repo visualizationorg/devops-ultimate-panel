@@ -32,7 +32,7 @@ const admin = {
         },
         {
           id: 'project-user-list',
-          title: 'Proje Kullanıcı Listesi',
+          title: <FormattedMessage id="project-user-list" />,
           type: 'item',
           url: '/project-user-list',
           icon: icons.FileTextTwoTone
@@ -120,7 +120,7 @@ const admin = {
         },
         {
           id: 'user-project-list',
-          title: 'Kullanıcı Proje Listesi',
+          title: <FormattedMessage id="user-project-list" />,
           type: 'item',
           url: '/user-project-list',
           icon: icons.FileTextTwoTone

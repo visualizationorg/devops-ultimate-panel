@@ -21,7 +21,8 @@
   "repo-list": "Repository List",
   "workitems": "Work Items",
   "workitems-list": "Work Items List",
-
+  "project-user-list": "Project User List",
+  "user-project-list": "User Project List",
   "audit-logs": "Audit Logs",
   "logon-events": "Logon Events",
   "report-events": "Report Events",

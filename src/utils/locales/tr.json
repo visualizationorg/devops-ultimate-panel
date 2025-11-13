@@ -21,7 +21,8 @@
   "repo-list": "Repository Listesi",
   "workitems": "Work Items",
   "workitems-list": "Work Item Listesi",
-
+  "project-user-list": "Proje Kullanıcı Listesi",
+  "user-project-list": "Kullanıcı Proje Listesi",
   "audit-logs": "Günlük Kayıtlar",
   "logon-events": "Giriş Hareketleri",
   "report-events": "Rapor Hareketleri",
